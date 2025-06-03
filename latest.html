@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executive Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Login Styles */
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .login-form {
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .login-form h2 {
+      color: #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      background-color: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 5px;
+      color: #d3d3d3;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .login-form button:hover {
+      background-color: #3a5a9f;
+    }
+
+    .viewer-login {
+      background-color: #5a5a5a !important;
+    }
+
+    .viewer-login:hover {
+      background-color: #4a4a4a !important;
+    }
+
+    /* Dashboard Styles */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f0f;
+      color: #d3d3d3;
+      font-size: 16px;
+    }
+
+    #dashboardContent {
+      display: none; /* Initially hidden */
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background-color: #1a1a1a;
+      border-bottom: 1px solid #2c2c2c;
+      flex-wrap: wrap;
+    }
+
+    header img {
+      height: 80px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      color: #e0e0e0;
+      text-align: center;
+      flex: 1;
+      margin: 0 20px;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .top-buttons button,
+    .view-dashboard-btn button,
+    .modal button {
+      background-color: #c0c0c0;
+      border: none;
+      color: #000;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s ease;
+      min-width: 120px;
+    }
+
+    .top-buttons button:hover,
+    .view-dashboard-btn button:hover,
+    .modal button:hover {
+      background-color: #a9a9a9;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 20px auto;
+      background: #121212;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(200, 200, 200, 0.05);
+    }
+
+    .section {
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .section h2 {
+      color: #e6e6e6;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .chart-container {
+      flex: 1 1 45%;
+      min-width: 300px;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(5px);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      height: 350px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .chart-title {
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #e0e0e0;
+    }
+
+    .chart-actions {
+      display: none; /* Hidden by default */
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .chart-actions button {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .chart {
+      flex: 1;
+<!--      position: relative;-->
+      width:300px;
+      height:300px
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .view-dashboard-btn {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .row-tables {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .table-wrapper {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 480px;
+    }
+
+    thead tr {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    tbody tr {
+      transition: background-color 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    th {
+      color: #f0f0f0;
+      font-weight: 600;
+    }
+
+    /* Admin Controls */
+    .admin-controls {
+      display: none; /* Hidden by default */
+      gap: 10px;
+      margin-bottom: 10px;
+      justify-content: flex-end;
+    }
+
+    .admin-controls button {
+      padding: 5px 10px;
+      font-size: 12px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .admin-controls button.delete {
+      background-color: #af4a4a;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+      background-color: #1a1a1a;
+      margin: 5% auto;
+      padding: 25px;
+      border: 1px solid #2c2c2c;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      color: #d3d3d3;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2c2c2c;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #e0e0e0;
+    }
+
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #e0e0e0;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      background-color: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 5px;
+      color: #d3d3d3;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #c0c0c0;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #2c2c2c;
+    }
+
+    .edit-btn {
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover {
+      background-color: #3a5a9f;
+    }
+
+    .save-btn {
+      background-color: #4aaf6b;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #3a9f5a;
+    }
+
+    .cancel-btn {
+      background-color: #af4a4a;
+      color: white;
+    }
+
+    .cancel-btn:hover {
+      background-color: #9f3a3a;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      header h1 {
+        font-size: 22px;
+        margin: 10px 0;
+      }
+
+      .top-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .top-buttons button,
+      .view-dashboard-btn button {
+        width: 100%;
+      }
+
+      .chart-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .chart-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .row-tables {
+        flex-direction: column;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      .section h2 {
+        font-size: 18px;
+      }
+
+      body {
+        font-size: 14px;
+      }
+
+      .modal-content {
+        width: 90%;
+        margin: 10% auto;
+      }
+
+      .admin-controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-form">
+      <h2>Dashboard Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Admin Login</button>
+      <button id="viewerLoginBtn" class="viewer-login">Viewer Access</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div id="dashboardContent">
+    <header>
+      <div><img src="/logo.png" alt="Logo" /></div>
+      <h1>Executive Dashboard</h1>
+      <div class="top-buttons">
+        <a href="https://payroll.zoho.in/app#/home/dashboard"><button>Payroll</button> </a>
+        <a href="https://books.zoho.in/app/60041363159#/home/dashboard?dashboard_id=defaultdashboard"> <button>Accounts</button> </a>
+        <a href="https://crm.zoho.in/crm/org60041969572/tab/Home/"><button>CRM</button> </a>
+        <button id="logoutBtn" style="background-color: #af4a4a; color: white;">Logout</button>
+      </div>
+    </header>
+
+    <div class="dashboard">
+      <div class="section">
+        <h2>Project Status</h2>
+        <div class="chart-row">
+          <div class="chart-container">
+            <div class="chart-title">Restromind</div>
+            <div class="chart"><canvas id="chartRestromind"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Restromind">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Lenskart</div>
+            <div class="chart"><canvas id="chartLenskart"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Lenskart">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Auditblaze</div>
+            <div class="chart"><canvas id="chartAuditblaze"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Auditblaze">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Mammocare</div>
+            <div class="chart"><canvas id="chartMammocare"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Mammocare">Undo</button>
+            </div>
+          </div>
+        </div>
+        <div class="admin-controls">
+          <button id="editProjectStatus">Edit Project Data</button>
+        </div>
+        <div class="view-dashboard-btn">
+          <a href="https://thinkneuralai-1747759712950.atlassian.net/jira/dashboards/10034"><button>View Dashboard</button></a>
+        </div>
+      </div>
+
+      <div class="row-tables">
+        <div class="table-wrapper">
+          <h2>Tech Stack</h2>
+          <div class="admin-controls">
+            <button class="add-row-btn" data-table="techStackTable">Add Row</button>
+            <button class="add-column-btn" data-table="techStackTable">Add Column</button>
+          </div>
+          <table id="techStackTable">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Tech Stack</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Restromind</td>
+                <td>React, Node.js</td>
+              </tr>
+              <tr>
+                <td>Lenskart</td>
+                <td>Angular, Java</td>
+              </tr>
+              <tr>
+                <td>Auditblaze</td>
+                <td>Vue.js, Python</td>
+              </tr>
+              <tr>
+                <td>Mammocare</td>
+                <td>Django, PostgreSQL</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper">
+          <h2>Ongoing Tasks</h2>
+          <div class="admin-controls">
+            <button class="add-row-btn" data-table="ongoingTasksTable">Add Row</button>
+            <button class="add-column-btn" data-table="ongoingTasksTable">Add Column</button>
+          </div>
+          <table id="ongoingTasksTable">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Task</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Restromind</td>
+                <td>UI Overhaul</td>
+              </tr>
+              <tr>
+                <td>Lenskart</td>
+                <td>Backend Optimization</td>
+              </tr>
+              <tr>
+                <td>Auditblaze</td>
+                <td>Bug Fixes</td>
+              </tr>
+              <tr>
+                <td>Mammocare</td>
+                <td>API Integration</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Sales Target</h2>
+        <table id="salesTargetTable">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>June</th>
+              <th>July</th>
+              <th>Aug</th>
+              <th>Oct</th>
+              <th>Nov</th>
+              <th>Dec</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Project 1</td>
+              <td>₹25,000</td>
+              <td>₹50,000</td>
+              <td>₹75,000</td>
+              <td>₹1,00,000</td>
+              <td>₹1,25,000</td>
+              <td>₹1,50,000</td>
+            </tr>
+            <tr>
+              <td>Project 2</td>
+              <td>₹30,000</td>
+              <td>₹55,000</td>
+              <td>₹80,000</td>
+              <td>₹1,05,000</td>
+              <td>₹1,30,000</td>
+              <td>₹1,55,000</td>
+            </tr>
+            <tr>
+              <td>Project 3</td>
+              <td>₹35,000</td>
+              <td>₹60,000</td>
+              <td>₹85,000</td>
+              <td>₹1,10,000</td>
+              <td>₹1,35,000</td>
+              <td>₹1,60,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>100 Days Project Phases</h2>
+        <table id="projectPhasesTable">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Timeline</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1</td>
+              <td>March 11 - March 31</td>
+              <td>Recruitment and Identification of POCs</td>
+            </tr>
+            <tr>
+              <td>Phase 2</td>
+              <td>April 01 - April 30</td>
+              <td>Creating POCs and Getting first customers</td>
+            </tr>
+            <tr>
+              <td>Phase 3</td>
+              <td>May 01 - May 31</td>
+              <td>Productisation and delivery to first customers (first billing)</td>
+            </tr>
+            <tr>
+              <td>Phase 4</td>
+              <td>June 01 - June 19</td>
+              <td>Building sales pipelines and Product customisation from market feedback</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Edit Modal for Charts -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Project Status</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="projectStatusForm">
+          <div class="form-group">
+            <label for="projectSelect">Project</label>
+            <select id="projectSelect" required>
+              <option value="">Select Project</option>
+              <option value="Restromind">Restromind</option>
+              <option value="Lenskart">Lenskart</option>
+              <option value="Auditblaze">Auditblaze</option>
+              <option value="Mammocare">Mammocare</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="todoCount">To Do Count</label>
+            <input type="number" id="todoCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="inProgressCount">In Progress Count</label>
+            <input type="number" id="inProgressCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="reviewCount">Review Count</label>
+            <input type="number" id="reviewCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="doneCount">Done Count</label>
+            <input type="number" id="doneCount" min="0" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Column Modal -->
+    <div id="addColumnModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add New Column</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="addColumnForm">
+          <div class="form-group">
+            <label for="columnName">Column Name</label>
+            <input type="text" id="columnName" required>
+          </div>
+          <div class="form-group">
+            <label for="defaultValue">Default Value</label>
+            <input type="text" id="defaultValue" value="">
+          </div>
+          <input type="hidden" id="targetTable">
+          <div class="modal-footer">
+            <button type="button" class="cancel-add-column cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Add Column</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirm Save Modal -->
+    <div id="confirmSaveModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Confirm Changes</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="form-group">
+          <p>Are you sure you want to save these changes?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="confirmCancelBtn" class="cancel-btn">Cancel</button>
+          <button type="button" id="confirmSaveBtn" class="save-btn">Confirm Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // User management
+    const ADMIN_CREDENTIALS = {
+      username: "admin",
+      password: "admin123"
+    };
+
+    let currentUser = null;
+    let chartHistory = {};
+    let pendingChanges = null;
+    let charts = {};
+    let projectData = {};
+
+    // Initialize the application when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      checkSession();
+      setupEventListeners();
+    });
+
+    // Check for existing session
+    function checkSession() {
+      const session = localStorage.getItem('dashboardSession');
+      if (session) {
+        try {
+          const { username, role, timestamp } = JSON.parse(session);
+          // Session expires after 8 hours
+          if (Date.now() - timestamp < 8 * 60 * 60 * 1000) {
+            currentUser = { username, role };
+            showDashboard(role === 'admin');
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing session:', e);
+        }
+      }
+      showLogin();
+    }
+
+    // Show login screen
+    function showLogin() {
+      document.getElementById('loginContainer').style.display = 'flex';
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    // Initialize session
+    function initSession(username, role) {
+      currentUser = { username, role };
+      localStorage.setItem('dashboardSession', JSON.stringify({
+        username,
+        role,
+        timestamp: Date.now()
+      }));
+      showDashboard(role === 'admin');
+    }
+
+    // Clear session
+    function clearSession() {
+      currentUser = null;
+      localStorage.removeItem('dashboardSession');
+      showLogin();
+    }
+
+    // Login function
+    function login(username, password) {
+      if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+      }
+
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        initSession(username, 'admin');
+      } else {
+        alert('Invalid admin credentials');
+      }
+    }
+
+    // Viewer login function
+    function viewerLogin() {
+      initSession('viewer', 'viewer');
+    }
+
+    // Logout function
+    function logout() {
+      clearSession();
+    }
+
+    // Show dashboard with appropriate permissions
+    function showDashboard(isAdmin) {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+
+      // Initialize dashboard components
+      initializeDashboard();
+
+      // Show/hide admin controls based on role
+      const adminControls = document.querySelectorAll('.admin-controls');
+      const chartActions = document.querySelectorAll('.chart-actions');
+
+      if (isAdmin) {
+        adminControls.forEach(el => el.style.display = 'flex');
+        chartActions.forEach(el => el.style.display = 'flex');
+      } else {
+        adminControls.forEach(el => el.style.display = 'none');
+        chartActions.forEach(el => el.style.display = 'none');
+      }
+    }
+
+    // Chart data and configuration
+    const STATUS_COLORS = {
+      'Done': '#4caf50',
+      'In Progress': '#ffc107',
+      'Review': '#2196f3',
+      'To Do': '#9e9e9e'
+    };
+
+    // Default data for projects
+    const defaultProjectData = {
+      Restromind: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [5, 3, 2, 4],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Lenskart: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [7, 2, 1, 3],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Auditblaze: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [4, 5, 1, 2],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Mammocare: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [6, 2, 3, 1],
+        backgroundColor: Object.values(STATUS_COLORS)
+      }
+    };
+
+    // Load data from localStorage or use default data
+    function loadProjectData() {
+      const savedData = localStorage.getItem('projectStatusData');
+      return savedData ? JSON.parse(savedData) : {...defaultProjectData};
+    }
+
+    // Save data to localStorage
+    function saveProjectData(data) {
+      localStorage.setItem('projectStatusData', JSON.stringify(data));
+    }
+
+    // Initialize chart history
+    function initChartHistory() {
+      const projects = ['Restromind', 'Lenskart', 'Auditblaze', 'Mammocare'];
+      projects.forEach(project => {
+        if (!chartHistory[project]) {
+          chartHistory[project] = [];
+        }
+      });
+    }
+
+    // Save current chart state to history
+    function saveChartState(project) {
+      if (!chartHistory[project]) {
+        chartHistory[project] = [];
+      }
+
+      // Keep only the last 5 states
+      if (chartHistory[project].length >= 5) {
+        chartHistory[project].shift();
+      }
+
+      chartHistory[project].push({
+        data: [...projectData[project].data],
+        timestamp: Date.now()
+      });
+    }
+
+    // Undo chart changes
+    function undoChartChanges(project) {
+      if (chartHistory[project] && chartHistory[project].length > 0) {
+        const lastState = chartHistory[project].pop();
+        projectData[project].data = lastState.data;
+        createPieChart(`chart${project}`, project);
+        saveProjectData(projectData);
+      } else {
+        alert('No more undo history available');
+      }
+    }
+
+    // Create pie chart
+    function createPieChart(canvasId, projectName) {
+      const chartData = projectData[projectName];
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      // Destroy existing chart if it exists
+      if (charts[projectName]) {
+        charts[projectName].destroy();
+      }
+
+      charts[projectName] = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            data: chartData.data,
+            backgroundColor: chartData.backgroundColor,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#d3d3d3',
+                font: { size: 14 }
+              }
+            },
+            title: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: context => {
+                  const val = context.raw;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  return `${context.label}: ${val} (${Math.round(val / total * 100)}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize dashboard
+    function initializeDashboard() {
+      // Load or initialize project data
+      projectData = loadProjectData();
+
+      // Initialize chart history
+      initChartHistory();
+
+      // Create charts
+      createPieChart('chartRestromind', 'Restromind');
+      createPieChart('chartLenskart', 'Lenskart');
+      createPieChart('chartAuditblaze', 'Auditblaze');
+      createPieChart('chartMammocare', 'Mammocare');
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Login button
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        login(username, password);
+      });
+
+      // Viewer login button
+      document.getElementById('viewerLoginBtn').addEventListener('click', viewerLogin);
+
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+
+      // Allow login with Enter key
+      document.getElementById('password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          login(username, password);
+        }
+      });
+
+      // Edit project status button
+      document.getElementById('editProjectStatus')?.addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'block';
+      });
+
+      // Chart undo buttons
+      document.querySelectorAll('.undo-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const project = e.target.getAttribute('data-chart');
+          undoChartChanges(project);
+        });
+      });
+
+      // Add row buttons
+      document.querySelectorAll('.add-row-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tableId = e.target.getAttribute('data-table');
+          const table = document.getElementById(tableId);
+          const tbody = table.querySelector('tbody');
+          const headerCells = table.querySelectorAll('thead th');
+
+          const newRow = document.createElement('tr');
+          headerCells.forEach((th, index) => {
+            const cell = document.createElement('td');
+            cell.textContent = index === 0 ? 'New Item' : '';
+            newRow.appendChild(cell);
+          });
+
+          tbody.appendChild(newRow);
+        });
+      });
+
+      // Add column buttons
+      document.querySelectorAll('.add-column-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tableId = e.target.getAttribute('data-table');
+          document.getElementById('targetTable').value = tableId;
+          document.getElementById('addColumnModal').style.display = 'block';
+        });
+      });
+
+      // Modal close buttons
+      document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.closest('.modal').style.display = 'none';
+        });
+      });
+
+      // Cancel buttons
+      document.getElementById('cancelBtn')?.addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-add-column')?.addEventListener('click', () => {
+        document.getElementById('addColumnModal').style.display = 'none';
+      });
+
+      // Form submissions
+      document.getElementById('projectStatusForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const project = document.getElementById('projectSelect').value;
+        const todo = parseInt(document.getElementById('todoCount').value);
+        const inProgress = parseInt(document.getElementById('inProgressCount').value);
+        const review = parseInt(document.getElementById('reviewCount').value);
+        const done = parseInt(document.getElementById('doneCount').value);
+
+        // Save current state for undo
+        saveChartState(project);
+
+        // Store pending changes
+        pendingChanges = {
+          project,
+          data: [done, inProgress, review, todo]
+        };
+
+        // Show confirmation modal
+        document.getElementById('editModal').style.display = 'none';
+        document.getElementById('confirmSaveModal').style.display = 'block';
+      });
+
+      // Add column form
+      document.getElementById('addColumnForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const columnName = document.getElementById('columnName').value;
+        const defaultValue = document.getElementById('defaultValue').value;
+        const tableId = document.getElementById('targetTable').value;
+
+        if (!columnName) return;
+
+        const table = document.getElementById(tableId);
+
+        // Add column to header
+        const headerRow = table.querySelector('thead tr');
+        const newHeaderCell = document.createElement('th');
+        newHeaderCell.textContent = columnName;
+        headerRow.appendChild(newHeaderCell);
+
+        // Add column to each row
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const newCell = document.createElement('td');
+          newCell.textContent = defaultValue;
+          row.appendChild(newCell);
+        });
+
+        document.getElementById('addColumnModal').style.display = 'none';
+        document.getElementById('addColumnForm').reset();
+      });
+
+      // Confirm save button
+      document.getElementById('confirmSaveBtn')?.addEventListener('click', () => {
+        if (pendingChanges) {
+          const { project, data } = pendingChanges;
+          projectData[project].data = data;
+          createPieChart(`chart${project}`, project);
+          saveProjectData(projectData);
+          pendingChanges = null;
+        }
+        document.getElementById('confirmSaveModal').style.display = 'none';
+      });
+
+      // Confirm cancel button
+      document.getElementById('confirmCancelBtn')?.addEventListener('click', () => {
+        pendingChanges = null;
+        document.getElementById('confirmSaveModal').style.display = 'none';
+      });
+    }
+  </script>
+</body>
+</html>
