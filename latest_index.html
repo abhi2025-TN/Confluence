@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executive Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Login Styles */
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .login-form {
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .login-form h2 {
+      color: #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .login-form input {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 15px;
+      background-color: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 5px;
+      color: #d3d3d3;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .login-form button:hover {
+      background-color: #3a5a9f;
+    }
+
+    .viewer-login {
+      background-color: #5a5a5a !important;
+    }
+
+    .viewer-login:hover {
+      background-color: #4a4a4a !important;
+    }
+
+    /* Dashboard Styles */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f0f;
+      color: #d3d3d3;
+      font-size: 16px;
+    }
+
+    #dashboardContent {
+      display: none; /* Initially hidden */
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background-color: #1a1a1a;
+      border-bottom: 1px solid #2c2c2c;
+      flex-wrap: wrap;
+    }
+
+    header img {
+      height: 80px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      color: #e0e0e0;
+      text-align: center;
+      flex: 1;
+      margin: 0 20px;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .top-buttons button,
+    .view-dashboard-btn button,
+    .modal button {
+      background-color: #c0c0c0;
+      border: none;
+      color: #000;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s ease;
+      min-width: 120px;
+    }
+
+    .top-buttons button:hover,
+    .view-dashboard-btn button:hover,
+    .modal button:hover {
+      background-color: #a9a9a9;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 20px auto;
+      background: #121212;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(200, 200, 200, 0.05);
+    }
+
+    .section {
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .section h2 {
+      color: #e6e6e6;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .chart-container {
+      flex: 1 1 45%;
+      min-width: 300px;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(5px);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      height: 350px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .chart-title {
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #e0e0e0;
+    }
+
+    .chart-actions {
+      display: none; /* Hidden by default */
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .chart-actions button {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .chart {
+      flex: 1;
+      position : relative;
+      width:500px;
+      height:300px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .view-dashboard-btn {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .row-tables {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .table-wrapper {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 480px;
+    }
+
+    thead tr {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    tbody tr {
+      transition: background-color 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    th {
+      color: #f0f0f0;
+      font-weight: 600;
+    }
+
+    /* Admin Controls */
+    .admin-controls {
+      display: none; /* Hidden by default */
+      gap: 10px;
+      margin-bottom: 10px;
+      justify-content: flex-end;
+    }
+
+    .admin-controls button {
+      padding: 5px 10px;
+      font-size: 12px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .admin-controls button.delete {
+      background-color: #af4a4a;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+      background-color: #1a1a1a;
+      margin: 5% auto;
+      padding: 25px;
+      border: 1px solid #2c2c2c;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      color: #d3d3d3;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2c2c2c;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #e0e0e0;
+    }
+
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #e0e0e0;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background-color: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 5px;
+      color: #d3d3d3;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #c0c0c0;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #2c2c2c;
+    }
+
+    .edit-btn {
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover {
+      background-color: #3a5a9f;
+    }
+
+    .save-btn {
+      background-color: #4aaf6b;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #3a9f5a;
+    }
+
+    .cancel-btn {
+      background-color: #af4a4a;
+      color: white;
+    }
+
+    .cancel-btn:hover {
+      background-color: #9f3a3a;
+    }
+
+    /* Table cell edit controls */
+    .cell-edit-controls {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: none;
+      gap: 2px;
+    }
+
+    .cell-edit-controls button {
+      padding: 2px 4px;
+      font-size: 10px;
+      border-radius: 2px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cell-edit-controls button.delete {
+      background-color: #af4a4a;
+    }
+
+    td:hover .cell-edit-controls,
+    th:hover .cell-edit-controls {
+      display: flex;
+    }
+
+    /* Column header controls */
+    .column-header-controls {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: none;
+      gap: 2px;
+    }
+
+    .column-header-controls button {
+      padding: 2px 4px;
+      font-size: 10px;
+      border-radius: 2px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .column-header-controls button.delete {
+      background-color: #af4a4a;
+    }
+
+    th:hover .column-header-controls {
+      display: flex;
+    }
+
+    /* Row controls */
+    .row-controls {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      gap: 2px;
+      flex-direction: column;
+    }
+
+    .row-controls button {
+      padding: 2px 4px;
+      font-size: 10px;
+      border-radius: 2px;
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .row-controls button.delete {
+      background-color: #af4a4a;
+    }
+
+    tr:hover .row-controls {
+      display: flex;
+    }
+
+    /* Table title edit */
+    .table-title-edit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .table-title-edit input {
+      background-color: transparent;
+      border: none;
+      color: #e6e6e6;
+      font-size: inherit;
+      font-weight: 600;
+      border-bottom: 1px solid #4a6baf;
+      padding: 2px 5px;
+      width: auto;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      header h1 {
+        font-size: 22px;
+        margin: 10px 0;
+      }
+
+      .top-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .top-buttons button,
+      .view-dashboard-btn button {
+        width: 100%;
+      }
+
+      .chart-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .chart-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .row-tables {
+        flex-direction: column;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      .section h2 {
+        font-size: 18px;
+      }
+
+      body {
+        font-size: 14px;
+      }
+
+      .modal-content {
+        width: 90%;
+        margin: 10% auto;
+      }
+
+      .admin-controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-form">
+      <h2>Dashboard Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Admin Login</button>
+      <button id="viewerLoginBtn" class="viewer-login">Viewer Access</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div id="dashboardContent">
+    <header>
+      <div><img src="/logo.png" alt="Logo" /></div>
+      <h1>Executive Dashboard</h1>
+      <div class="top-buttons">
+        <a href="https://payroll.zoho.in/app#/home/dashboard"><button>Payroll</button> </a>
+        <a href="https://books.zoho.in/app/60041363159#/home/dashboard?dashboard_id=defaultdashboard"> <button>Accounts</button> </a>
+        <a href="https://crm.zoho.in/crm/org60041969572/tab/Home/"><button>CRM</button> </a>
+        <button id="logoutBtn" style="background-color: #af4a4a; color: white;">Logout</button>
+      </div>
+    </header>
+
+    <div class="dashboard">
+      <div class="section">
+        <h2>Project Status</h2>
+        <div class="chart-row">
+          <div class="chart-container">
+            <div class="chart-title">Restromind</div>
+            <div class="chart"><canvas id="chartRestromind"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Restromind">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Lenskart</div>
+            <div class="chart"><canvas id="chartLenskart"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Lenskart">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Auditblaze</div>
+            <div class="chart"><canvas id="chartAuditblaze"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Auditblaze">Undo</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Mammocare</div>
+            <div class="chart"><canvas id="chartMammocare"></canvas></div>
+            <div class="chart-actions">
+              <button class="undo-btn" data-chart="Mammocare">Undo</button>
+            </div>
+          </div>
+        </div>
+        <div class="admin-controls">
+          <button id="editProjectStatus">Edit Project Data</button>
+        </div>
+        <div class="view-dashboard-btn">
+          <a href="https://thinkneuralai-1747759712950.atlassian.net/jira/dashboards/10034"><button>View Dashboard</button></a>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Tables</h2>
+        <div class="admin-controls">
+          <button id="createNewTable">Create New Table</button>
+        </div>
+        <div class="row-tables" id="tablesContainer">
+          <div class="table-wrapper">
+            <h2 class="table-title-edit">
+              <span class="table-title-text">Tech Stack</span>
+              <input type="text" class="table-title-input" style="display: none;">
+            </h2>
+            <div class="admin-controls">
+              <button class="add-row-btn" data-table="techStackTable">Add Row</button>
+              <button class="add-column-btn" data-table="techStackTable">Add Column</button>
+              <button class="save-table-btn" data-table="techStackTable">Save Table</button>
+            </div>
+            <table id="techStackTable">
+              <thead>
+                <tr>
+                  <th>Project
+                    <div class="column-header-controls">
+                      <button class="edit-col-btn">Edit</button>
+                      <button class="delete-col-btn delete">Delete</button>
+                    </div>
+                  </th>
+                  <th>Tech Stack
+                    <div class="column-header-controls">
+                      <button class="edit-col-btn">Edit</button>
+                      <button class="delete-col-btn delete">Delete</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Restromind
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>React, Node.js
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Lenskart
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>Angular, Java
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Auditblaze
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>Vue.js, Python
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Mammocare
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>Django, PostgreSQL
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-wrapper">
+            <h2 class="table-title-edit">
+              <span class="table-title-text">Ongoing Tasks</span>
+              <input type="text" class="table-title-input" style="display: none;">
+            </h2>
+            <div class="admin-controls">
+              <button class="add-row-btn" data-table="ongoingTasksTable">Add Row</button>
+              <button class="add-column-btn" data-table="ongoingTasksTable">Add Column</button>
+              <button class="save-table-btn" data-table="ongoingTasksTable">Save Table</button>
+            </div>
+            <table id="ongoingTasksTable">
+              <thead>
+                <tr>
+                  <th>Project
+                    <div class="column-header-controls">
+                      <button class="edit-col-btn">Edit</button>
+                      <button class="delete-col-btn delete">Delete</button>
+                    </div>
+                  </th>
+                  <th>Task
+                    <div class="column-header-controls">
+                      <button class="edit-col-btn">Edit</button>
+                      <button class="delete-col-btn delete">Delete</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Restromind
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>UI Overhaul
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Lenskart
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>Backend Optimization
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Auditblaze
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>Bug Fixes
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+                <tr>
+                  <td>Mammocare
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <td>API Integration
+                    <div class="cell-edit-controls">
+                      <button class="edit-cell-btn">Edit</button>
+                    </div>
+                  </td>
+                  <div class="row-controls">
+                    <button class="edit-row-btn">Edit</button>
+                    <button class="delete-row-btn delete">Delete</button>
+                  </div>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="table-wrapper">
+          <h2 class="table-title-edit">
+            <span class="table-title-text">Sales Target</span>
+            <input type="text" class="table-title-input" style="display: none;">
+          </h2>
+          <div class="admin-controls">
+            <button class="add-row-btn" data-table="salesTargetTable">Add Row</button>
+            <button class="add-column-btn" data-table="salesTargetTable">Add Column</button>
+            <button class="save-table-btn" data-table="salesTargetTable">Save Table</button>
+          </div>
+          <table id="salesTargetTable">
+            <thead>
+              <tr>
+                <th>Project
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>June
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>July
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Aug
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Oct
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Nov
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Dec
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Project 1
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹25,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹50,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹75,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,00,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,25,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,50,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+              <tr>
+                <td>Project 2
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹30,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹55,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹80,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,05,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,30,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,55,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+              <tr>
+                <td>Project 3
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹35,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹60,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹85,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,10,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,35,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>₹1,60,000
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="table-wrapper">
+          <h2 class="table-title-edit">
+            <span class="table-title-text">100 Days Project Phases</span>
+            <input type="text" class="table-title-input" style="display: none;">
+          </h2>
+          <div class="admin-controls">
+            <button class="add-row-btn" data-table="projectPhasesTable">Add Row</button>
+            <button class="add-column-btn" data-table="projectPhasesTable">Add Column</button>
+            <button class="save-table-btn" data-table="projectPhasesTable">Save Table</button>
+          </div>
+          <table id="projectPhasesTable">
+            <thead>
+              <tr>
+                <th>Phase
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Timeline
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+                <th>Description
+                  <div class="column-header-controls">
+                    <button class="edit-col-btn">Edit</button>
+                    <button class="delete-col-btn delete">Delete</button>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Phase 1
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>March 11 - March 31
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>Recruitment and Identification of POCs
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+              <tr>
+                <td>Phase 2
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>April 01 - April 30
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>Creating POCs and Getting first customers
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+              <tr>
+                <td>Phase 3
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>May 01 - May 31
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>Productisation and delivery to first customers (first billing)
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+              <tr>
+                <td>Phase 4
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>June 01 - June 19
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <td>Building sales pipelines and Product customisation from market feedback
+                  <div class="cell-edit-controls">
+                    <button class="edit-cell-btn">Edit</button>
+                  </div>
+                </td>
+                <div class="row-controls">
+                  <button class="edit-row-btn">Edit</button>
+                  <button class="delete-row-btn delete">Delete</button>
+                </div>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Modal for Charts -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Project Status</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="projectStatusForm">
+          <div class="form-group">
+            <label for="projectSelect">Project</label>
+            <select id="projectSelect" required>
+              <option value="">Select Project</option>
+              <option value="Restromind">Restromind</option>
+              <option value="Lenskart">Lenskart</option>
+              <option value="Auditblaze">Auditblaze</option>
+              <option value="Mammocare">Mammocare</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="todoCount">To Do Count</label>
+            <input type="number" id="todoCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="inProgressCount">In Progress Count</label>
+            <input type="number" id="inProgressCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="reviewCount">Review Count</label>
+            <input type="number" id="reviewCount" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="doneCount">Done Count</label>
+            <input type="number" id="doneCount" min="0" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Column Modal -->
+    <div id="addColumnModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add New Column</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="addColumnForm">
+          <div class="form-group">
+            <label for="columnName">Column Name</label>
+            <input type="text" id="columnName" required>
+          </div>
+          <div class="form-group">
+            <label for="defaultValue">Default Value</label>
+            <input type="text" id="defaultValue" value="">
+          </div>
+          <input type="hidden" id="targetTable">
+          <div class="modal-footer">
+            <button type="button" class="cancel-add-column cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Add Column</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Cell Modal -->
+    <div id="editCellModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Cell Value</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="editCellForm">
+          <div class="form-group">
+            <label for="cellValue">New Value</label>
+            <input type="text" id="cellValue" required>
+          </div>
+          <input type="hidden" id="targetCell">
+          <div class="modal-footer">
+            <button type="button" class="cancel-edit-cell cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Column Modal -->
+    <div id="editColumnModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Column Name</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="editColumnForm">
+          <div class="form-group">
+            <label for="newColumnName">New Column Name</label>
+            <input type="text" id="newColumnName" required>
+          </div>
+          <input type="hidden" id="targetColumn">
+          <div class="modal-footer">
+            <button type="button" class="cancel-edit-column cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Row Modal -->
+    <div id="editRowModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Row</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="editRowForm">
+          <div id="rowFieldsContainer"></div>
+          <input type="hidden" id="targetRow">
+          <div class="modal-footer">
+            <button type="button" class="cancel-edit-row cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Create New Table Modal -->
+    <div id="createTableModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Create New Table</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="createTableForm">
+          <div class="form-group">
+            <label for="tableName">Table Name</label>
+            <input type="text" id="tableName" required>
+          </div>
+          <div class="form-group">
+            <label for="columnsCount">Number of Columns</label>
+            <input type="number" id="columnsCount" min="1" max="10" value="2" required>
+          </div>
+          <div id="columnNamesContainer"></div>
+          <div class="form-group">
+            <label for="initialRows">Initial Rows (comma separated)</label>
+            <textarea id="initialRows" placeholder="Enter values separated by commas for each row. Separate rows with new lines."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="cancel-create-table cancel-btn">Cancel</button>
+            <button type="submit" class="save-btn">Create Table</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirm Save Modal -->
+    <div id="confirmSaveModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Confirm Changes</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="form-group">
+          <p>Are you sure you want to save these changes?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="confirmCancelBtn" class="cancel-btn">Cancel</button>
+          <button type="button" id="confirmSaveBtn" class="save-btn">Confirm Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirmDeleteModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Confirm Delete</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="form-group">
+          <p id="deleteConfirmationText">Are you sure you want to delete this item?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="confirmDeleteCancelBtn" class="cancel-btn">Cancel</button>
+          <button type="button" id="confirmDeleteBtn" class="save-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // User management
+    const ADMIN_CREDENTIALS = {
+      username: "admin",
+      password: "admin123"
+    };
+
+    let currentUser = null;
+    let chartHistory = {};
+    let pendingChanges = null;
+    let charts = {};
+    let projectData = {};
+    let tablesData = {};
+    let currentDeletion = {
+      type: null,
+      target: null
+    };
+
+    // Initialize the application when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      checkSession();
+      setupEventListeners();
+    });
+
+    // Check for existing session
+    function checkSession() {
+      const session = localStorage.getItem('dashboardSession');
+      if (session) {
+        try {
+          const { username, role, timestamp } = JSON.parse(session);
+          // Session expires after 8 hours
+          if (Date.now() - timestamp < 8 * 60 * 60 * 1000) {
+            currentUser = { username, role };
+            showDashboard(role === 'admin');
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing session:', e);
+        }
+      }
+      showLogin();
+    }
+
+    // Show login screen
+    function showLogin() {
+      document.getElementById('loginContainer').style.display = 'flex';
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    // Initialize session
+    function initSession(username, role) {
+      currentUser = { username, role };
+      localStorage.setItem('dashboardSession', JSON.stringify({
+        username,
+        role,
+        timestamp: Date.now()
+      }));
+      showDashboard(role === 'admin');
+    }
+
+    // Clear session
+    function clearSession() {
+      currentUser = null;
+      localStorage.removeItem('dashboardSession');
+      showLogin();
+    }
+
+    // Login function
+    function login(username, password) {
+      if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+      }
+
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        initSession(username, 'admin');
+      } else {
+        alert('Invalid admin credentials');
+      }
+    }
+
+    // Viewer login function
+    function viewerLogin() {
+      initSession('viewer', 'viewer');
+    }
+
+    // Logout function
+    function logout() {
+      clearSession();
+    }
+
+    // Show dashboard with appropriate permissions
+    function showDashboard(isAdmin) {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+
+      // Initialize dashboard components
+      initializeDashboard();
+
+      // Show/hide admin controls based on role
+      const adminControls = document.querySelectorAll('.admin-controls');
+      const chartActions = document.querySelectorAll('.chart-actions');
+      const editControls = document.querySelectorAll('.cell-edit-controls, .column-header-controls, .row-controls');
+
+      if (isAdmin) {
+        adminControls.forEach(el => el.style.display = 'flex');
+        chartActions.forEach(el => el.style.display = 'flex');
+        editControls.forEach(el => el.style.display = 'flex');
+      } else {
+        adminControls.forEach(el => el.style.display = 'none');
+        chartActions.forEach(el => el.style.display = 'none');
+        editControls.forEach(el => el.style.display = 'none');
+      }
+    }
+
+    // Chart data and configuration
+    const STATUS_COLORS = {
+      'Done': '#4caf50',
+      'In Progress': '#ffc107',
+      'Review': '#2196f3',
+      'To Do': '#9e9e9e'
+    };
+
+    // Default data for projects
+    const defaultProjectData = {
+      Restromind: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [5, 3, 2, 4],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Lenskart: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [7, 2, 1, 3],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Auditblaze: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [4, 5, 1, 2],
+        backgroundColor: Object.values(STATUS_COLORS)
+      },
+      Mammocare: {
+        labels: ['Done', 'In Progress', 'Review', 'To Do'],
+        data: [6, 2, 3, 1],
+        backgroundColor: Object.values(STATUS_COLORS)
+      }
+    };
+
+    // Default data for tables
+    const defaultTablesData = {
+      techStackTable: {
+        title: "Tech Stack",
+        columns: ["Project", "Tech Stack"],
+        rows: [
+          ["Restromind", "React, Node.js"],
+          ["Lenskart", "Angular, Java"],
+          ["Auditblaze", "Vue.js, Python"],
+          ["Mammocare", "Django, PostgreSQL"]
+        ]
+      },
+      ongoingTasksTable: {
+        title: "Ongoing Tasks",
+        columns: ["Project", "Task"],
+        rows: [
+          ["Restromind", "UI Overhaul"],
+          ["Lenskart", "Backend Optimization"],
+          ["Auditblaze", "Bug Fixes"],
+          ["Mammocare", "API Integration"]
+        ]
+      },
+      salesTargetTable: {
+        title: "Sales Target",
+        columns: ["Project", "June", "July", "Aug", "Oct", "Nov", "Dec"],
+        rows: [
+          ["Project 1", "₹25,000", "₹50,000", "₹75,000", "₹1,00,000", "₹1,25,000", "₹1,50,000"],
+          ["Project 2", "₹30,000", "₹55,000", "₹80,000", "₹1,05,000", "₹1,30,000", "₹1,55,000"],
+          ["Project 3", "₹35,000", "₹60,000", "₹85,000", "₹1,10,000", "₹1,35,000", "₹1,60,000"]
+        ]
+      },
+      projectPhasesTable: {
+        title: "100 Days Project Phases",
+        columns: ["Phase", "Timeline", "Description"],
+        rows: [
+          ["Phase 1", "March 11 - March 31", "Recruitment and Identification of POCs"],
+          ["Phase 2", "April 01 - April 30", "Creating POCs and Getting first customers"],
+          ["Phase 3", "May 01 - May 31", "Productisation and delivery to first customers (first billing)"],
+          ["Phase 4", "June 01 - June 19", "Building sales pipelines and Product customisation from market feedback"]
+        ]
+      }
+    };
+
+    // Load data from localStorage or use default data
+    function loadProjectData() {
+      const savedData = localStorage.getItem('projectStatusData');
+      return savedData ? JSON.parse(savedData) : {...defaultProjectData};
+    }
+
+    // Save data to localStorage
+    function saveProjectData(data) {
+      localStorage.setItem('projectStatusData', JSON.stringify(data));
+    }
+
+    // Load tables data from localStorage or use default data
+    function loadTablesData() {
+      const savedData = localStorage.getItem('tablesData');
+      return savedData ? JSON.parse(savedData) : {...defaultTablesData};
+    }
+
+    // Save tables data to localStorage
+    function saveTablesData(data) {
+      localStorage.setItem('tablesData', JSON.stringify(data));
+    }
+
+    // Initialize chart history
+    function initChartHistory() {
+      const projects = ['Restromind', 'Lenskart', 'Auditblaze', 'Mammocare'];
+      projects.forEach(project => {
+        if (!chartHistory[project]) {
+          chartHistory[project] = [];
+        }
+      });
+    }
+
+    // Save current chart state to history
+    function saveChartState(project) {
+      if (!chartHistory[project]) {
+        chartHistory[project] = [];
+      }
+
+      // Keep only the last 5 states
+      if (chartHistory[project].length >= 5) {
+        chartHistory[project].shift();
+      }
+
+      chartHistory[project].push({
+        data: [...projectData[project].data],
+        timestamp: Date.now()
+      });
+    }
+
+    // Undo chart changes
+    function undoChartChanges(project) {
+      if (chartHistory[project] && chartHistory[project].length > 0) {
+        const lastState = chartHistory[project].pop();
+        projectData[project].data = lastState.data;
+        createPieChart(`chart${project}`, project);
+        saveProjectData(projectData);
+      } else {
+        alert('No more undo history available');
+      }
+    }
+
+    // Create pie chart
+    function createPieChart(canvasId, projectName) {
+      const chartData = projectData[projectName];
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      // Destroy existing chart if it exists
+      if (charts[projectName]) {
+        charts[projectName].destroy();
+      }
+
+      charts[projectName] = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            data: chartData.data,
+            backgroundColor: chartData.backgroundColor,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#d3d3d3',
+                font: { size: 14 }
+              }
+            },
+            title: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: context => {
+                  const val = context.raw;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  return `${context.label}: ${val} (${Math.round(val / total * 100)}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Render table from data
+    function renderTable(tableId, tableData) {
+      const tableWrapper = document.querySelector(`#${tableId}`).closest('.table-wrapper');
+      const titleElement = tableWrapper.querySelector('.table-title-text');
+      titleElement.textContent = tableData.title;
+
+      const table = document.getElementById(tableId);
+
+      // Clear existing table
+      table.innerHTML = '';
+
+      // Create header
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+
+      tableData.columns.forEach((column, colIndex) => {
+        const th = document.createElement('th');
+        th.textContent = column;
+
+        // Add column controls for admin
+        if (currentUser?.role === 'admin') {
+          const controls = document.createElement('div');
+          controls.className = 'column-header-controls';
+          controls.style.display = 'flex';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'edit-col-btn';
+          editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditColumnModal(tableId, colIndex, column);
+          });
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-col-btn delete';
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            confirmDelete('column', tableId, colIndex);
+          });
+
+          controls.appendChild(editBtn);
+          controls.appendChild(deleteBtn);
+          th.appendChild(controls);
+        }
+
+        headerRow.appendChild(th);
+      });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      // Create body
+      const tbody = document.createElement('tbody');
+
+      tableData.rows.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+
+        row.forEach((cell, cellIndex) => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+
+          // Add cell controls for admin
+          if (currentUser?.role === 'admin') {
+            const controls = document.createElement('div');
+            controls.className = 'cell-edit-controls';
+            controls.style.display = 'flex';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-cell-btn';
+            editBtn.textContent = 'Edit';
+            editBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              openEditCellModal(tableId, rowIndex, cellIndex, cell);
+            });
+
+            controls.appendChild(editBtn);
+            td.appendChild(controls);
+          }
+
+          tr.appendChild(td);
+        });
+
+        // Add row controls for admin
+        if (currentUser?.role === 'admin') {
+          const controls = document.createElement('div');
+          controls.className = 'row-controls';
+          controls.style.display = 'flex';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'edit-row-btn';
+          editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditRowModal(tableId, rowIndex, row);
+          });
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-row-btn delete';
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            confirmDelete('row', tableId, rowIndex);
+          });
+
+          controls.appendChild(editBtn);
+          controls.appendChild(deleteBtn);
+          tr.appendChild(controls);
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+    }
+
+    // Open edit cell modal
+    function openEditCellModal(tableId, rowIndex, cellIndex, currentValue) {
+      document.getElementById('cellValue').value = currentValue;
+      document.getElementById('targetCell').value = JSON.stringify({ tableId, rowIndex, cellIndex });
+      document.getElementById('editCellModal').style.display = 'block';
+    }
+
+    // Open edit column modal
+    function openEditColumnModal(tableId, colIndex, currentName) {
+      document.getElementById('newColumnName').value = currentName;
+      document.getElementById('targetColumn').value = JSON.stringify({ tableId, colIndex });
+      document.getElementById('editColumnModal').style.display = 'block';
+    }
+
+    // Open edit row modal
+    function openEditRowModal(tableId, rowIndex, currentValues) {
+      const container = document.getElementById('rowFieldsContainer');
+      container.innerHTML = '';
+
+      const tableData = tablesData[tableId];
+
+      tableData.columns.forEach((column, index) => {
+        const group = document.createElement('div');
+        group.className = 'form-group';
+
+        const label = document.createElement('label');
+        label.textContent = column;
+        group.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentValues[index] || '';
+        input.dataset.columnIndex = index;
+        group.appendChild(input);
+
+        container.appendChild(group);
+      });
+
+      document.getElementById('targetRow').value = JSON.stringify({ tableId, rowIndex });
+      document.getElementById('editRowModal').style.display = 'block';
+    }
+
+    // Confirm deletion
+    function confirmDelete(type, tableId, index) {
+      let message = '';
+
+      if (type === 'row') {
+        message = `Are you sure you want to delete row ${index + 1}?`;
+      } else if (type === 'column') {
+        const tableData = tablesData[tableId];
+        message = `Are you sure you want to delete column "${tableData.columns[index]}"?`;
+      } else if (type === 'table') {
+        message = `Are you sure you want to delete the table "${tablesData[tableId].title}"?`;
+      }
+
+      document.getElementById('deleteConfirmationText').textContent = message;
+      currentDeletion = { type, target: { tableId, index } };
+      document.getElementById('confirmDeleteModal').style.display = 'block';
+    }
+
+    // Perform deletion
+    function performDeletion() {
+      const { type, target } = currentDeletion;
+      const { tableId, index } = target;
+
+      if (type === 'row') {
+        tablesData[tableId].rows.splice(index, 1);
+      } else if (type === 'column') {
+        tablesData[tableId].columns.splice(index, 1);
+        tablesData[tableId].rows.forEach(row => row.splice(index, 1));
+      }
+
+      renderTable(tableId, tablesData[tableId]);
+      saveTablesData(tablesData);
+      document.getElementById('confirmDeleteModal').style.display = 'none';
+    }
+
+    // Create a new table
+    function createNewTable() {
+      document.getElementById('createTableForm').reset();
+      document.getElementById('columnNamesContainer').innerHTML = '';
+      document.getElementById('createTableModal').style.display = 'block';
+
+      // Initialize column name inputs based on default count
+      updateColumnNameInputs();
+    }
+
+    // Update column name inputs when count changes
+    function updateColumnNameInputs() {
+      const count = parseInt(document.getElementById('columnsCount').value);
+      const container = document.getElementById('columnNamesContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const group = document.createElement('div');
+        group.className = 'form-group';
+
+        const label = document.createElement('label');
+        label.textContent = `Column ${i + 1} Name`;
+        group.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.required = true;
+        input.value = `Column ${i + 1}`;
+        input.name = `column${i}`;
+        group.appendChild(input);
+
+        container.appendChild(group);
+      }
+    }
+
+    // Add a new table to the dashboard
+    function addNewTableToDashboard(tableId, tableData) {
+      const tablesContainer = document.getElementById('tablesContainer');
+
+      const tableWrapper = document.createElement('div');
+      tableWrapper.className = 'table-wrapper';
+
+      const titleDiv = document.createElement('h2');
+      titleDiv.className = 'table-title-edit';
+
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'table-title-text';
+      titleSpan.textContent = tableData.title;
+
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.className = 'table-title-input';
+      titleInput.style.display = 'none';
+
+      titleDiv.appendChild(titleSpan);
+      titleDiv.appendChild(titleInput);
+      tableWrapper.appendChild(titleDiv);
+
+      if (currentUser?.role === 'admin') {
+        const adminControls = document.createElement('div');
+        adminControls.className = 'admin-controls';
+        adminControls.style.display = 'flex';
+
+        const addRowBtn = document.createElement('button');
+        addRowBtn.className = 'add-row-btn';
+        addRowBtn.dataset.table = tableId;
+        addRowBtn.textContent = 'Add Row';
+        addRowBtn.addEventListener('click', () => {
+          tablesData[tableId].rows.push(Array(tablesData[tableId].columns.length).fill(''));
+          renderTable(tableId, tablesData[tableId]);
+        });
+
+        const addColBtn = document.createElement('button');
+        addColBtn.className = 'add-column-btn';
+        addColBtn.dataset.table = tableId;
+        addColBtn.textContent = 'Add Column';
+        addColBtn.addEventListener('click', () => {
+          document.getElementById('targetTable').value = tableId;
+          document.getElementById('addColumnModal').style.display = 'block';
+        });
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'save-table-btn';
+        saveBtn.dataset.table = tableId;
+        saveBtn.textContent = 'Save Table';
+        saveBtn.addEventListener('click', () => {
+          saveTablesData(tablesData);
+          alert('Table saved successfully!');
+        });
+
+        adminControls.appendChild(addRowBtn);
+        adminControls.appendChild(addColBtn);
+        adminControls.appendChild(saveBtn);
+        tableWrapper.appendChild(adminControls);
+      }
+
+      const table = document.createElement('table');
+      table.id = tableId;
+      tableWrapper.appendChild(table);
+
+      tablesContainer.appendChild(tableWrapper);
+
+      // Add table to data structure
+      tablesData[tableId] = tableData;
+
+      // Render the table
+      renderTable(tableId, tableData);
+    }
+
+    // Initialize dashboard
+    function initializeDashboard() {
+      // Load or initialize project data
+      projectData = loadProjectData();
+      tablesData = loadTablesData();
+
+      // Initialize chart history
+      initChartHistory();
+
+      // Create charts
+      createPieChart('chartRestromind', 'Restromind');
+      createPieChart('chartLenskart', 'Lenskart');
+      createPieChart('chartAuditblaze', 'Auditblaze');
+      createPieChart('chartMammocare', 'Mammocare');
+
+      // Render tables
+      Object.keys(tablesData).forEach(tableId => {
+        renderTable(tableId, tablesData[tableId]);
+      });
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Login button
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        login(username, password);
+      });
+
+      // Viewer login button
+      document.getElementById('viewerLoginBtn').addEventListener('click', viewerLogin);
+
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+
+      // Allow login with Enter key
+      document.getElementById('password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          login(username, password);
+        }
+      });
+
+      // Edit project status button
+      document.getElementById('editProjectStatus')?.addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'block';
+      });
+
+      // Chart undo buttons
+      document.querySelectorAll('.undo-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const project = e.target.getAttribute('data-chart');
+          undoChartChanges(project);
+        });
+      });
+
+      // Add row buttons
+      document.querySelectorAll('.add-row-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tableId = e.target.getAttribute('data-table');
+          tablesData[tableId].rows.push(Array(tablesData[tableId].columns.length).fill(''));
+          renderTable(tableId, tablesData[tableId]);
+        });
+      });
+
+      // Add column buttons
+      document.querySelectorAll('.add-column-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tableId = e.target.getAttribute('data-table');
+          document.getElementById('targetTable').value = tableId;
+          document.getElementById('addColumnModal').style.display = 'block';
+        });
+      });
+
+      // Save table buttons
+      document.querySelectorAll('.save-table-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tableId = e.target.getAttribute('data-table');
+          saveTablesData(tablesData);
+          alert('Table saved successfully!');
+        });
+      });
+
+      // Table title edit
+      document.querySelectorAll('.table-title-edit').forEach(wrapper => {
+        const text = wrapper.querySelector('.table-title-text');
+        const input = wrapper.querySelector('.table-title-input');
+
+        text.addEventListener('click', () => {
+          if (currentUser?.role === 'admin') {
+            input.value = text.textContent;
+            text.style.display = 'none';
+            input.style.display = 'inline-block';
+            input.focus();
+          }
+        });
+
+        input.addEventListener('blur', () => {
+          const newTitle = input.value.trim();
+          if (newTitle) {
+            text.textContent = newTitle;
+            const tableId = wrapper.closest('.table-wrapper').querySelector('table').id;
+            tablesData[tableId].title = newTitle;
+            saveTablesData(tablesData);
+          }
+          text.style.display = 'inline-block';
+          input.style.display = 'none';
+        });
+
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            input.blur();
+          }
+        });
+      });
+
+      // Modal close buttons
+      document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.closest('.modal').style.display = 'none';
+        });
+      });
+
+      // Cancel buttons
+      document.getElementById('cancelBtn')?.addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-add-column')?.addEventListener('click', () => {
+        document.getElementById('addColumnModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-edit-cell')?.addEventListener('click', () => {
+        document.getElementById('editCellModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-edit-column')?.addEventListener('click', () => {
+        document.getElementById('editColumnModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-edit-row')?.addEventListener('click', () => {
+        document.getElementById('editRowModal').style.display = 'none';
+      });
+
+      document.querySelector('.cancel-create-table')?.addEventListener('click', () => {
+        document.getElementById('createTableModal').style.display = 'none';
+      });
+
+      // Form submissions
+      document.getElementById('projectStatusForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const project = document.getElementById('projectSelect').value;
+        const todo = parseInt(document.getElementById('todoCount').value);
+        const inProgress = parseInt(document.getElementById('inProgressCount').value);
+        const review = parseInt(document.getElementById('reviewCount').value);
+        const done = parseInt(document.getElementById('doneCount').value);
+
+        // Save current state for undo
+        saveChartState(project);
+
+        // Store pending changes
+        pendingChanges = {
+          project,
+          data: [done, inProgress, review, todo]
+        };
+
+        // Show confirmation modal
+        document.getElementById('editModal').style.display = 'none';
+        document.getElementById('confirmSaveModal').style.display = 'block';
+      });
+
+      // Add column form
+      document.getElementById('addColumnForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const columnName = document.getElementById('columnName').value;
+        const defaultValue = document.getElementById('defaultValue').value;
+        const tableId = document.getElementById('targetTable').value;
+
+        if (!columnName) return;
+
+        // Add column to data structure
+        tablesData[tableId].columns.push(columnName);
+        tablesData[tableId].rows.forEach(row => row.push(defaultValue));
+
+        // Re-render table
+        renderTable(tableId, tablesData[tableId]);
+
+        document.getElementById('addColumnModal').style.display = 'none';
+        document.getElementById('addColumnForm').reset();
+      });
+
+      // Edit cell form
+      document.getElementById('editCellForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const newValue = document.getElementById('cellValue').value;
+        const { tableId, rowIndex, cellIndex } = JSON.parse(document.getElementById('targetCell').value);
+
+        tablesData[tableId].rows[rowIndex][cellIndex] = newValue;
+        renderTable(tableId, tablesData[tableId]);
+
+        document.getElementById('editCellModal').style.display = 'none';
+      });
+
+      // Edit column form
+      document.getElementById('editColumnForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const newName = document.getElementById('newColumnName').value;
+        const { tableId, colIndex } = JSON.parse(document.getElementById('targetColumn').value);
+
+        tablesData[tableId].columns[colIndex] = newName;
+        renderTable(tableId, tablesData[tableId]);
+
+        document.getElementById('editColumnModal').style.display = 'none';
+      });
+
+      // Edit row form
+      document.getElementById('editRowForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const { tableId, rowIndex } = JSON.parse(document.getElementById('targetRow').value);
+        const inputs = document.querySelectorAll('#rowFieldsContainer input');
+
+        inputs.forEach((input, index) => {
+          tablesData[tableId].rows[rowIndex][index] = input.value;
+        });
+
+        renderTable(tableId, tablesData[tableId]);
+        document.getElementById('editRowModal').style.display = 'none';
+      });
+
+      // Create table form
+      document.getElementById('createTableForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const tableName = document.getElementById('tableName').value;
+        const columnsCount = parseInt(document.getElementById('columnsCount').value);
+        const initialRows = document.getElementById('initialRows').value;
+
+        // Get column names
+        const columns = [];
+        for (let i = 0; i < columnsCount; i++) {
+          const input = document.querySelector(`input[name="column${i}"]`);
+          columns.push(input.value);
+        }
+
+        // Parse initial rows
+        const rows = [];
+        if (initialRows.trim()) {
+          initialRows.split('\n').forEach(line => {
+            const values = line.split(',').map(val => val.trim());
+            if (values.length === columnsCount) {
+              rows.push(values);
+            }
+          });
+        }
+
+        // Create table ID
+        const tableId = `table${Object.keys(tablesData).length + 1}`;
+
+        // Create table data
+        const tableData = {
+          title: tableName,
+          columns: columns,
+          rows: rows.length > 0 ? rows : [Array(columnsCount).fill('')]
+        };
+
+        // Add table to dashboard
+        addNewTableToDashboard(tableId, tableData);
+
+        // Save tables data
+        saveTablesData(tablesData);
+
+        document.getElementById('createTableModal').style.display = 'none';
+      });
+
+      // Columns count change
+      document.getElementById('columnsCount')?.addEventListener('change', updateColumnNameInputs);
+
+      // Create new table button
+      document.getElementById('createNewTable')?.addEventListener('click', createNewTable);
+
+      // Confirm save button
+      document.getElementById('confirmSaveBtn')?.addEventListener('click', () => {
+        if (pendingChanges) {
+          const { project, data } = pendingChanges;
+          projectData[project].data = data;
+          createPieChart(`chart${project}`, project);
+          saveProjectData(projectData);
+          pendingChanges = null;
+        }
+        document.getElementById('confirmSaveModal').style.display = 'none';
+      });
+
+      // Confirm cancel button
+      document.getElementById('confirmCancelBtn')?.addEventListener('click', () => {
+        pendingChanges = null;
+        document.getElementById('confirmSaveModal').style.display = 'none';
+      });
+
+      // Confirm delete button
+      document.getElementById('confirmDeleteBtn')?.addEventListener('click', performDeletion);
+
+      // Confirm delete cancel button
+      document.getElementById('confirmDeleteCancelBtn')?.addEventListener('click', () => {
+        document.getElementById('confirmDeleteModal').style.display = 'none';
+      });
+    }
+  </script>
+</body>
+</html>
